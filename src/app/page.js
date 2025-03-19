@@ -39,18 +39,6 @@ export default function MemoryGame() {
     "bg-teal-500",
   ];
 
-  // Initialize the game preview
-  useEffect(() => {
-    initializePreview();
-  }, []);
-
-  // Initialize the game level
-  useEffect(() => {
-    if (gameStatus === "playing") {
-      initializeLevel(level);
-    }
-  }, [level, gameStatus]);
-
   // Initialize a preview of the game
   const initializePreview = () => {
     const pairsCount = 2; // 4 buckets for preview
@@ -105,6 +93,18 @@ export default function MemoryGame() {
     setSelectedBuckets([]);
     setMatchedPairs(0);
   };
+
+  // Initialize the game preview
+  useEffect(() => {
+    initializePreview();
+  }, []);
+
+  // Initialize the game level
+  useEffect(() => {
+    if (gameStatus === "playing") {
+      initializeLevel(level);
+    }
+  }, [level, gameStatus, initializeLevel]);
 
   // Handle bucket click
   const handleBucketClick = (bucket) => {
@@ -400,7 +400,8 @@ export default function MemoryGame() {
 
             {gameStatus === "playing" && (
               <div className="flex flex-col items-center">
-                <div className={`grid grid-cols-4 sm:flex  gap-10 absolute top-85 z-10`}>
+                <div
+                  className={`grid grid-cols-4 sm:flex  gap-10 absolute top-85 z-10`}>
                   {buckets.map((bucket) => (
                     <Bucket
                       key={bucket.id}
@@ -437,7 +438,7 @@ export default function MemoryGame() {
               <div className="p-6 text-center bg-white rounded-lg shadow-md">
                 <div className="text-4xl mb-4">🏆</div>
                 <h2 className="text-2xl font-bold mb-4">Congratulations!</h2>
-                <p className="mb-4">You've completed all levels!</p>
+                <p className="mb-4">You&apos;ve completed all levels!</p>
                 <button
                   onClick={resetGame}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
@@ -449,7 +450,7 @@ export default function MemoryGame() {
             {gameStatus === "lost" && (
               <div className="p-6 text-center bg-white rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold mb-4">Game Over</h2>
-                <p className="mb-4">You've run out of chances.</p>
+                <p className="mb-4">You&apos;ve run out of chances.</p>
                 <button
                   onClick={resetGame}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
