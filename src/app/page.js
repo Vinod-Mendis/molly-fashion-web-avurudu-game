@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Bucket from "@/components/bucket";
+
 import Image from "next/image";
 import title from "../../public/images/title.png";
 import logo from "../../public/images/molly logo.png";
@@ -13,6 +13,7 @@ import mandala from "../../public/images/mandala.png";
 import mandala_b from "../../public/images/mandala-b.png";
 import title_2 from "../../public/images/title-2.png";
 import mandala_rules from "../../public/images/mandala-rules.png";
+import Bucket from "../components/Bucket";
 
 // Game configuration constant
 const INITIAL_CHANCES = 5;
