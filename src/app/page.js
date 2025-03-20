@@ -47,18 +47,6 @@ export default function MemoryGame() {
   ];
 
   // Initialize the game preview
-  useEffect(() => {
-    initializePreview();
-  }, []);
-
-  // Initialize the game level
-  useEffect(() => {
-    if (gameStatus === "playing") {
-      initializeLevel(level);
-    }
-  }, [level, gameStatus]);
-
-  // Initialize a preview of the game
   const initializePreview = () => {
     const pairsCount = 2; // 4 buckets for preview
 
@@ -112,6 +100,18 @@ export default function MemoryGame() {
     setSelectedBuckets([]);
     setMatchedPairs(0);
   };
+
+  // Initialize the game preview
+  useEffect(() => {
+    initializePreview();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Initialize the game level
+  useEffect(() => {
+    if (gameStatus === "playing") {
+      initializeLevel(level);
+    }
+  }, [level, gameStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle bucket click
   const handleBucketClick = (bucket) => {
@@ -539,7 +539,7 @@ export default function MemoryGame() {
                     />
                   </div>
                   <p className="mb-4 text-xl px-10 mt-5">
-                    You've completed all levels!
+                    You&apos;ve completed all levels!
                   </p>
                   {/* <button
                 onClick={resetGame}
@@ -567,7 +567,7 @@ export default function MemoryGame() {
                     />
                   </div>
                   <p className="mb-4 text-xl px-10 mt-5">
-                    You've run out of chances.
+                    You&apos;ve run out of chances.
                   </p>
                   {/* <button
                   onClick={resetGame}
