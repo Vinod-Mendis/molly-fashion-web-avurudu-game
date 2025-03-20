@@ -2,8 +2,8 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-
+import { useState, useEffect, useRef } from "react";
+import Bucket from "@/components/bucket";
 import Image from "next/image";
 import title from "../../public/images/title.png";
 import logo from "../../public/images/molly logo.png";
@@ -13,7 +13,8 @@ import mandala from "../../public/images/mandala.png";
 import mandala_b from "../../public/images/mandala-b.png";
 import title_2 from "../../public/images/title-2.png";
 import mandala_rules from "../../public/images/mandala-rules.png";
-import Bucket from "../components/Bucket";
+import kokis from "../../public/images/kokis.png";
+import BackgroundMusic from "@/components/BackgroundMusic";
 
 // Game configuration constant
 const INITIAL_CHANCES = 5;
@@ -27,6 +28,11 @@ export default function MemoryGame() {
   const [gameStatus, setGameStatus] = useState("preview"); // preview, rules, playing, won, lost
   const [isChecking, setIsChecking] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Colors for the buckets
   const colors = [
@@ -39,6 +45,18 @@ export default function MemoryGame() {
     "bg-orange-500",
     "bg-teal-500",
   ];
+
+  // Initialize the game preview
+  useEffect(() => {
+    initializePreview();
+  }, []);
+
+  // Initialize the game level
+  useEffect(() => {
+    if (gameStatus === "playing") {
+      initializeLevel(level);
+    }
+  }, [level, gameStatus]);
 
   // Initialize a preview of the game
   const initializePreview = () => {
@@ -95,18 +113,6 @@ export default function MemoryGame() {
     setMatchedPairs(0);
   };
 
-  // Initialize the game preview
-  useEffect(() => {
-    initializePreview();
-  }, []);
-
-  // Initialize the game level
-  useEffect(() => {
-    if (gameStatus === "playing") {
-      initializeLevel(level);
-    }
-  }, [level, gameStatus, initializeLevel]);
-
   // Handle bucket click
   const handleBucketClick = (bucket) => {
     // Prevent clicking if already checking a pair or bucket is already flipped
@@ -157,7 +163,9 @@ export default function MemoryGame() {
       if (matchedPairs + 1 === buckets.length / 2) {
         if (level === 3) {
           // Game won
-          setGameStatus("won");
+          setTimeout(() => {
+            setGameStatus("won");
+          }, 2000);
         } else {
           // Advance to next level
           setTimeout(() => {
@@ -180,7 +188,9 @@ export default function MemoryGame() {
 
       // Check if game over
       if (newChances === 0) {
-        setGameStatus("lost");
+        setTimeout(() => {
+          setGameStatus("lost");
+        }, 1000);
       }
     }
 
@@ -238,9 +248,69 @@ export default function MemoryGame() {
 
   const levelTag = getLevelTag();
 
+  const [audio, setAudio] = useState(null);
+
+  useEffect(() => {
+    // Initialize audio in useEffect to ensure it happens after component mount
+    const audioElement = new Audio("/audio/sound2.wav");
+
+    // Add volume control (0.0 to 1.0, where 1.0 is full volume)
+    const volume = 0.1; // 50% volume, adjust as needed
+    audioElement.volume = volume;
+
+    setAudio(audioElement);
+
+    // Optional: Clean up on unmount
+    return () => {
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.src = "";
+      }
+    };
+  }, []); // Empty dependency array means this runs once on mount
+
+  const playAudio = () => {
+    if (audio) {
+      // Reset the audio position if it was already played
+      audio.currentTime = 0;
+      audio.play().catch((err) => console.error("Audio playback error:", err));
+    }
+  };
+
+  // playAudio();
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bggr">
+    <div className="flex flex-col items-center justify-center min-h-screen overflow-hidden">
+      {/* {isMounted && <BackgroundMusic />} */}
+
       <div className="w-full flex flex-col items-center">
+        {/* Clouds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
+        <div id="clouds">
+          <div className="cloud x1"></div>
+          <div className="cloud x2"></div>
+          <div className="cloud x3"></div>
+          <div className="cloud x4"></div>
+          <div className="cloud x5"></div>
+          <div className="cloud x6"></div>
+          <div className="cloud x7"></div>
+        </div>
+        {/* Clouds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
+        {/* birds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/}
+        <div className="overflow-hidden absolute inset-0">
+          <div className="bird-container bird-container-one">
+            <div className="bird bird-one"></div>
+          </div>
+          <div className="bird-container bird-container-two">
+            <div className="bird bird-two"></div>
+          </div>
+          <div className="bird-container bird-container-three">
+            <div className="bird bird-three"></div>
+          </div>
+          <div className="bird-container bird-container-four">
+            <div className="bird bird-four"></div>
+          </div>
+        </div>
+        {/* birds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/}
         <Image
           src={mandala || "/placeholder.svg"}
           width={200}
@@ -274,21 +344,21 @@ export default function MemoryGame() {
         <div className="bg-gradient-to-b from-[#2A5286] to-[#2A5286/0] w-full flex justify-center items-center absolute top-0 py-10">
           {gameStatus !== "playing" && (
             <>
-              <div className="bg-white py-6 px-10 rounded-b-2xl absolute top-0 left-20 z-10">
+              <div className="bg-white py-6 px-10 rounded-b-2xl absolute top-0 sm:left-20 z-10">
                 <Image
                   src={logo || "/placeholder.svg"}
                   width={200}
                   height={200}
                   alt="logo"
-                  // className="absolute top-14"
+                  className=""
                 />
               </div>
               <Image
                 src={sun || "/placeholder.svg"}
-                width={300}
-                height={300}
+                width={100}
+                height={100}
                 alt="sun"
-                className="absolute top-0 right-0 z-10"
+                className="absolute top-0 right-0 z-10 sm:w-[280px]"
               />
               <Image
                 src={title || "/placeholder.svg"}
@@ -311,7 +381,10 @@ export default function MemoryGame() {
 
             <div className="absolute z-10 bottom-20 w-full flex items-center justify-center">
               <button
-                onClick={showRulesPopup}
+                onClick={() => {
+                  showRulesPopup();
+                  playAudio();
+                }}
                 className="px-8 py-4 bg-[#B39B00] border-2 border-white shadow-2xl shadow-black/70 cursor-pointer text-white rounded-lg hover:bg-[#816F00] transition-colors text-xl font-bold">
                 Play
               </button>
@@ -386,17 +459,19 @@ export default function MemoryGame() {
         )}
 
         {gameStatus !== "preview" && !showRules && (
-          <>
+          <div className="bg-yellow-400">
             <div className="flex items-center justify-center w-full max-w-md mb-6">
-              <div className="flex flex-col gap-4 items-center absolute top-40">
-                <div className="text-xl font-semibold mr-2 uppercase text-white">
-                  Level {level}:
+              {gameStatus !== "won" && gameStatus !== "lost" && (
+                <div className="flex flex-col gap-4 items-center absolute top-40">
+                  <div className="text-xl font-semibold mr-2 uppercase text-white">
+                    Level {level}:
+                  </div>
+                  <span
+                    className={`${levelTag.color} text-white px-12 py-2 rounded-full text-xl uppercase font-medium`}>
+                    {levelTag.text}
+                  </span>
                 </div>
-                <span
-                  className={`${levelTag.color} text-white px-12 py-2 rounded-full text-xl uppercase font-medium`}>
-                  {levelTag.text}
-                </span>
-              </div>
+              )}
             </div>
 
             {gameStatus === "playing" && (
@@ -413,20 +488,32 @@ export default function MemoryGame() {
                 </div>
 
                 {/* Lives just under the buckets */}
-                <div className="flex items-center justify-center mt-2">
-                  <div className="text-xl font-semibold mr-2">Lives:</div>
-                  <div className="flex">
+                <div className="flex flex-col gap-4 items-center justify-center absolute bottom-0 bg-gradient-to-t from-green-800/65 w-full h-56">
+                  <div className="text-xl font-semibold uppercase">Lives:</div>
+                  <div className="flex gap-4">
                     {Array.from({ length: chances }).map((_, i) => (
-                      <div key={i} className="w-6 h-6 text-red-500 mr-1">
-                        ❤️
+                      <div key={i}>
+                        <Image
+                          src={kokis}
+                          width={50}
+                          height={50}
+                          alt="mandala"
+                          className=""
+                        />
                       </div>
                     ))}
                     {Array.from({ length: INITIAL_CHANCES - chances }).map(
                       (_, i) => (
                         <div
                           key={i + chances}
-                          className="w-6 h-6 text-gray-300 mr-1">
-                          🖤
+                          className="text-gray-300 opacity-30">
+                          <Image
+                            src={kokis}
+                            width={50}
+                            height={50}
+                            alt="mandala"
+                            className=""
+                          />
                         </div>
                       )
                     )}
@@ -436,30 +523,61 @@ export default function MemoryGame() {
             )}
 
             {gameStatus === "won" && (
-              <div className="p-6 text-center bg-white rounded-lg shadow-md">
-                <div className="text-4xl mb-4">🏆</div>
-                <h2 className="text-2xl font-bold mb-4">Congratulations!</h2>
-                <p className="mb-4">You&apos;ve completed all levels!</p>
-                <button
-                  onClick={resetGame}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-                  Play Again
-                </button>
+              <div className="flex items-center justify-center bg-black/50 w-full h-screen absolute inset-0 z-10">
+                <div className="py-10 w-fit text-center bg-white rounded-2xl shadow-2xl relative overflow-hidden">
+                  <div className="w-full bg-gradient-to-t from-[#B39B00]/40 absolute h-20 bottom-0 left-0" />
+                  <div className="overflow-hidden bg-gradient-to-r from-[#B39B00] via-[#897700] to-[#B39B00] w-full flex justify-center items-center py-2 relative">
+                    <h2 className="text-xl text-white uppercase font-bold relative z-10">
+                      Congratulations!
+                    </h2>
+                    <Image
+                      src={mandala_rules || "/placeholder.svg"}
+                      width={300}
+                      height={300}
+                      alt="logo"
+                      className="absolute z-0 opacity-30"
+                    />
+                  </div>
+                  <p className="mb-4 text-xl px-10 mt-5">
+                    You've completed all levels!
+                  </p>
+                  {/* <button
+                onClick={resetGame}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                Try Again
+              </button> */}
+                </div>
               </div>
             )}
 
             {gameStatus === "lost" && (
-              <div className="p-6 text-center bg-white rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold mb-4">Game Over</h2>
-                <p className="mb-4">You&apos;ve run out of chances.</p>
-                <button
+              <div className="flex items-center justify-center bg-black/50 w-full h-screen absolute inset-0 z-10">
+                <div className="py-10 w-fit text-center bg-white rounded-2xl shadow-2xl relative overflow-hidden">
+                  <div className="w-full bg-gradient-to-t from-[#B39B00]/40 absolute h-20 bottom-0 left-0" />
+                  <div className="overflow-hidden bg-gradient-to-r from-[#B39B00] via-[#897700] to-[#B39B00] w-full flex justify-center items-center py-2 relative">
+                    <h2 className="text-xl text-white uppercase font-bold relative z-10">
+                      GAME OVER
+                    </h2>
+                    <Image
+                      src={mandala_rules || "/placeholder.svg"}
+                      width={300}
+                      height={300}
+                      alt="logo"
+                      className="absolute z-0 opacity-30"
+                    />
+                  </div>
+                  <p className="mb-4 text-xl px-10 mt-5">
+                    You've run out of chances.
+                  </p>
+                  {/* <button
                   onClick={resetGame}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
                   Try Again
-                </button>
+                </button> */}
+                </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
