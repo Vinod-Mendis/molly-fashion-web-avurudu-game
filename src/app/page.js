@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Bucket from "@/components/bucket";
+import Bucket from "../components/Bucket";
 import Image from "next/image";
 import title from "../../public/images/title.png";
 import logo from "../../public/images/molly logo.png";
@@ -14,7 +14,6 @@ import mandala_b from "../../public/images/mandala-b.png";
 import title_2 from "../../public/images/title-2.png";
 import mandala_rules from "../../public/images/mandala-rules.png";
 import kokis from "../../public/images/kokis.png";
-import BackgroundMusic from "@/components/BackgroundMusic";
 
 // Game configuration constant
 const INITIAL_CHANCES = 5;
@@ -281,7 +280,6 @@ export default function MemoryGame() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen overflow-hidden">
-      {/* {isMounted && <BackgroundMusic />} */}
 
       <div className="w-full flex flex-col items-center">
         {/* Clouds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
