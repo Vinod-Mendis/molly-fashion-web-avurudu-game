@@ -1,3 +1,5 @@
+/** @format */
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -20,8 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-800 bg-[url('/images/bg.png')]`}
-      >
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-800 bg-[url('/images/bg.webp')]`}>
         {children}
       </body>
     </html>
