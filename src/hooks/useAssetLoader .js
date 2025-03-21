@@ -49,13 +49,16 @@ const useAssetLoader = (initialAssetPaths) => {
     // Update progress
     const updateProgress = (path) => {
       loadedCount++;
-      const newProgress = (loadedCount / totalAssets) * 100;
+      // Cap progress at 95% until everything is completely loaded
+      // This gives visual feedback that loading is still in progress
+      const rawProgress = (loadedCount / totalAssets) * 100;
+      const cappedProgress = Math.min(rawProgress, 95);
       console.log(
-        `Loaded: ${path} (${loadedCount}/${totalAssets}, ${newProgress.toFixed(
+        `Loaded: ${path} (${loadedCount}/${totalAssets}, ${rawProgress.toFixed(
           2
-        )}%)`
+        )}% - displayed: ${cappedProgress.toFixed(2)}%)`
       );
-      setProgress(newProgress);
+      setProgress(cappedProgress);
     };
 
     // Load all assets
@@ -163,12 +166,15 @@ const useAssetLoader = (initialAssetPaths) => {
       const successful = results.filter((r) => r.status === "fulfilled").length;
       console.log(`Successfully loaded ${successful}/${totalAssets} assets`);
 
-      // Set assets and complete loading
+      // Set assets
       setLoadedAssets(newLoadedAssets);
-      setIsLoading(false);
-      setFullyLoaded(true);
 
-      console.log("Loading screen can now be hidden");
+      // Add a delay to ensure all assets are fully rendered before hiding the loading screen
+      setTimeout(() => {
+        setIsLoading(false);
+        setFullyLoaded(true);
+        console.log("Loading screen can now be hidden");
+      }, 1000); // 1 second delay
     });
 
     // Cleanup function
