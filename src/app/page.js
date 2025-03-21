@@ -101,30 +101,32 @@ export default function MemoryGame() {
   ];
 
   // Preload images when component mounts
-  useEffect(() => {
-    const preloadImages = async () => {
-      const promises = imageList.map((image) => {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.src = image.src;
-          img.onload = resolve;
-          img.onerror = reject;
-        });
+  // Preload images when component mounts
+useEffect(() => {
+  const preloadImages = async () => {
+    const promises = imageList.map((image) => {
+      return new Promise((resolve, reject) => {
+        // Use the global window.Image constructor instead of just Image
+        const img = new window.Image();
+        img.src = image.src;
+        img.onload = resolve;
+        img.onerror = reject;
       });
+    });
 
-      try {
-        await Promise.all(promises);
-        setImagesLoaded(true);
-        console.log("All images preloaded successfully");
-      } catch (error) {
-        console.error("Failed to preload images:", error);
-        // Still set as loaded even if some images fail, so the game can proceed
-        setImagesLoaded(true);
-      }
-    };
+    try {
+      await Promise.all(promises);
+      setImagesLoaded(true);
+      console.log("All images preloaded successfully");
+    } catch (error) {
+      console.error("Failed to preload images:", error);
+      // Still set as loaded even if some images fail, so the game can proceed
+      setImagesLoaded(true);
+    }
+  };
 
-    preloadImages();
-  }, []);
+  preloadImages();
+}, []);
 
   useEffect(() => {
     setIsMounted(true);
