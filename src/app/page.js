@@ -61,7 +61,7 @@ export default function MemoryGame() {
         "/images/fluid/fluid_green.png",
         "/images/fluid/fluid_orange.png",
         "/images/fluid/fluid_pink.png",
-        "/images/fluid/fluid_purple.png",
+        "/images/fluid/fluid_pruple.png",
         "/images/fluid/fluid_red.png",
         "/images/fluid/fluid_teal.png",
         "/images/fluid/fluid_yellow.png",
