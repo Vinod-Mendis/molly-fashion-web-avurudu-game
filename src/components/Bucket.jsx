@@ -3,7 +3,6 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import pot_ideal from "../../public/images/pot.png";
 
 export default function Bucket({ bucket, onClick }) {
   const [showColorFlash, setShowColorFlash] = useState(false);
@@ -29,28 +28,16 @@ export default function Bucket({ bucket, onClick }) {
 
   const colorName = getColorName(bucket.color);
 
-  // Determine which pot image to show based on bucket state
-  const getPotImage = () => {
-    // If we have color-specific pot images
-    try {
-      if (bucket.isMatched) {
-        // For matched buckets, show broken pot with color
-        return require(`../../public/images/pot_broken_${colorName}.png`);
-      } else if (bucket.isFlipped) {
-        // For flipped but not matched, show pot with fluid of color
-        return require(`../../public/images/colors/broken_pot_${colorName}.png`);
-      }
-    } catch (error) {
-      // Fallback to generic images if color-specific ones aren't available
-      if (bucket.isMatched) {
-        return require("../../public/images/broken pot.png");
-      } else if (bucket.isFlipped) {
-        return require("../../public/images/broken pot with fluid.png");
-      }
+  // Instead of using require(), use paths that match the preloaded images
+  const getPotImagePath = () => {
+    if (bucket.isMatched) {
+      return `/images/colors/broken_pot_${colorName}.png`;
+    } else if (bucket.isFlipped) {
+      return `/images/colors/broken_pot_${colorName}.png`;
     }
 
     // Default state - intact pot
-    return pot_ideal;
+    return "/images/pot.png";
   };
 
   // Extract the color value from the Tailwind class for the flash effect
@@ -65,7 +52,8 @@ export default function Bucket({ bucket, onClick }) {
       yellow: "rgba(234, 179, 8, 0.7)", // yellow-500 with opacity
       purple: "rgba(168, 85, 247, 0.7)", // purple-500 with opacity
       pink: "rgba(236, 72, 153, 0.7)", // pink-500 with opacity
-      // Add more colors as needed
+      orange: "rgba(249, 115, 22, 0.7)", // orange-500 with opacity
+      teal: "rgba(20, 184, 166, 0.7)", // teal-500 with opacity
     };
 
     return colorMap[colorName] || "rgba(255, 255, 255, 0.7)";
@@ -76,29 +64,24 @@ export default function Bucket({ bucket, onClick }) {
       className="relative w-24 h-full cursor-pointer transition-all duration-300 transform hover:scale-105"
       onClick={onClick}>
       <Image
-        src={getPotImage() || "/placeholder.svg"}
+        src={getPotImagePath()}
         width={400}
         height={400}
         alt="pot"
         className="w-full h-auto"
+        priority={true}
       />
 
       {/* Color flash overlay that appears when matched */}
       {showColorFlash && (
-        // <div
-        //   className="absolute inset-0 z-10 animate-fade-out"
-        //   style={{
-        //     backgroundColor: getColorValue(bucket.color),
-        //     animation: "fadeOut 1s forwards",
-        //   }}
-        // />
         <div className="animate-fade-out absolute -bottom-12 z-10 w-full">
           <Image
             src={`/images/fluid/fluid_${colorName}.png`}
             width={400}
             height={400}
-            alt="pot"
-            className="w-full h-auto "
+            alt="fluid"
+            className="w-full h-auto"
+            priority={true}
           />
         </div>
       )}
