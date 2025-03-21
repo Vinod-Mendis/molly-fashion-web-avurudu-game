@@ -32,6 +32,19 @@ const LoadingScreen = ({ progress }) => {
         </div>
 
         <div className="text-white mt-2">{Math.round(progress)}%</div>
+
+        {/* Loading indicator animation */}
+        <div className="flex mt-4">
+          <div
+            className="animate-bounce mx-1 h-2 w-2 bg-white rounded-full"
+            style={{ animationDelay: "0ms" }}></div>
+          <div
+            className="animate-bounce mx-1 h-2 w-2 bg-white rounded-full"
+            style={{ animationDelay: "150ms" }}></div>
+          <div
+            className="animate-bounce mx-1 h-2 w-2 bg-white rounded-full"
+            style={{ animationDelay: "300ms" }}></div>
+        </div>
       </div>
     </div>
   );
