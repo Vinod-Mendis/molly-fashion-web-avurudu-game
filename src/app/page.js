@@ -4,6 +4,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import Bucket from "../components/Bucket";
+import LoadingScreen from "../components/LoadingScreen ";
+import useAssetLoader from "../hooks/useAssetLoader ";
 import Image from "next/image";
 import title from "../../public/images/title.png";
 import logo from "../../public/images/molly logo.png";
@@ -28,10 +30,90 @@ export default function MemoryGame() {
   const [isChecking, setIsChecking] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [audio, setAudio] = useState(null);
 
+  // Game assets to preload
+  const [assetPaths, setAssetPaths] = useState([]);
+  const { loadedAssets, progress, isLoading, fullyLoaded } =
+    useAssetLoader(assetPaths);
+
+  // Set up assets to preload on component mount
+  useEffect(() => {
+    if (isMounted) {
+      // Define all the specific files we need to load
+      const images = [
+        "/images/title.png",
+        "/images/molly logo.png",
+        "/images/sun.png",
+        "/images/rope.png",
+        "/images/mandala.png",
+        "/images/mandala-b.png",
+        "/images/title-2.png",
+        "/images/mandala-rules.png",
+        "/images/kokis.png",
+        "/images/pot.png",
+        "/images/broken pot.png",
+        "/images/broken pot with fluid.png",
+      ];
+
+      const fluid = [
+        "/images/fluid/fluid_blue.png",
+        "/images/fluid/fluid_green.png",
+        "/images/fluid/fluid_orange.png",
+        "/images/fluid/fluid_pink.png",
+        "/images/fluid/fluid_purple.png",
+        "/images/fluid/fluid_red.png",
+        "/images/fluid/fluid_teal.png",
+        "/images/fluid/fluid_yellow.png",
+      ];
+
+      const color = [
+        "/images/colors/broken_pot_blue.png",
+        "/images/colors/broken_pot_green.png",
+        "/images/colors/broken_pot_orange.png",
+        "/images/colors/broken_pot_pink.png",
+        "/images/colors/broken_pot_purple.png",
+        "/images/colors/broken_pot_red.png",
+        "/images/colors/broken_pot_teal.png",
+        "/images/colors/broken_pot_yellow.png",
+      ];
+
+      const audioFiles = ["/audio/sound2.wav"];
+
+      // Combine all asset paths
+      setAssetPaths([...images, ...fluid, ...color, ...audioFiles]);
+
+      console.log(
+        `Setting up ${
+          images.length + fluid.length + color.length + audioFiles.length
+        } assets to load`
+      );
+    }
+  }, [isMounted]);
+
+  // Set isMounted after component mounts
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    // Initialize audio in useEffect to ensure it happens after assets are loaded
+    if (fullyLoaded && isMounted) {
+      const audioElement = new Audio("/audio/sound2.wav");
+      // Add volume control (0.0 to 1.0, where 1.0 is full volume)
+      const volume = 0.1; // 10% volume
+      audioElement.volume = volume;
+      setAudio(audioElement);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.src = "";
+      }
+    };
+  }, [fullyLoaded, isMounted]);
 
   // Colors for the buckets
   const colors = [
@@ -100,17 +182,19 @@ export default function MemoryGame() {
     setMatchedPairs(0);
   };
 
-  // Initialize the game preview
+  // Initialize the game preview once assets are loaded
   useEffect(() => {
-    initializePreview();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (fullyLoaded && isMounted) {
+      initializePreview();
+    }
+  }, [fullyLoaded, isMounted]);
 
   // Initialize the game level
   useEffect(() => {
-    if (gameStatus === "playing") {
+    if (gameStatus === "playing" && fullyLoaded) {
       initializeLevel(level);
     }
-  }, [level, gameStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [level, gameStatus, fullyLoaded]);
 
   // Handle bucket click
   const handleBucketClick = (bucket) => {
@@ -247,27 +331,6 @@ export default function MemoryGame() {
 
   const levelTag = getLevelTag();
 
-  const [audio, setAudio] = useState(null);
-
-  useEffect(() => {
-    // Initialize audio in useEffect to ensure it happens after component mount
-    const audioElement = new Audio("/audio/sound2.wav");
-
-    // Add volume control (0.0 to 1.0, where 1.0 is full volume)
-    const volume = 0.1; // 50% volume, adjust as needed
-    audioElement.volume = volume;
-
-    setAudio(audioElement);
-
-    // Optional: Clean up on unmount
-    return () => {
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.src = "";
-      }
-    };
-  }, []); // Empty dependency array means this runs once on mount
-
   const playAudio = () => {
     if (audio) {
       // Reset the audio position if it was already played
@@ -276,11 +339,13 @@ export default function MemoryGame() {
     }
   };
 
-  // playAudio();
+  // Show loading screen if loading assets
+  if (!fullyLoaded) {
+    return <LoadingScreen progress={progress} />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen overflow-hidden">
-
       <div className="w-full flex flex-col items-center">
         {/* Clouds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
         <div id="clouds">
@@ -369,6 +434,7 @@ export default function MemoryGame() {
           )}
         </div>
 
+        {/* Rest of the component remains the same as in your original code */}
         {gameStatus === "preview" && (
           <div className="relative w-full h-screen flex justify-center items-center">
             <div className="grid grid-cols-2 sm:flex gap-14 opacity-80 absolute top-85 z-10">
