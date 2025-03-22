@@ -11,9 +11,12 @@ export default function ImagePreloader({
 }) {
   const [loadedImages, setLoadedImages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorImages, setErrorImages] = useState([]);
 
   // Calculate loading percentage
-  const loadingPercentage = Math.round((loadedImages / images.length) * 100);
+  const totalImages = images?.length || 0;
+  const loadingPercentage =
+    totalImages > 0 ? Math.round((loadedImages / totalImages) * 100) : 100;
 
   useEffect(() => {
     // Skip preloading if no images provided
@@ -23,8 +26,12 @@ export default function ImagePreloader({
       return;
     }
 
+    // Debug info
+    console.log(`Preloading ${images.length} images`);
+
     // Once all images are loaded, call the callback
     if (loadedImages === images.length) {
+      console.log("All images loaded successfully");
       setTimeout(() => {
         setIsLoading(false);
         onLoadingComplete && onLoadingComplete();
@@ -35,6 +42,13 @@ export default function ImagePreloader({
   // Handle successful image load
   const handleImageLoad = () => {
     setLoadedImages((prev) => prev + 1);
+  };
+
+  // Handle image error
+  const handleImageError = (src) => {
+    console.error(`Failed to load image: ${src}`);
+    setErrorImages((prev) => [...prev, src]);
+    handleImageLoad(); // Count errors as loaded to prevent getting stuck
   };
 
   return (
@@ -52,22 +66,39 @@ export default function ImagePreloader({
           </div>
 
           <div className="text-white">{loadingPercentage}%</div>
+
+          {errorImages.length > 0 && (
+            <div className="text-red-300 mt-4 text-sm">
+              Failed to load {errorImages.length} image(s)
+            </div>
+          )}
         </div>
       )}
 
       {/* Hidden container to load images */}
       <div className="hidden">
-        {images.map((src, index) => (
-          <Image
-            key={index}
-            src={src}
-            alt="preload"
-            width={1}
-            height={1}
-            onLoad={handleImageLoad}
-            onError={handleImageLoad} // Count errors as loaded to prevent getting stuck
-          />
-        ))}
+        {images &&
+          images.map((src, index) => {
+            // Skip null or undefined image paths
+            if (!src) {
+              console.warn(`Image ${index} has no source`);
+              handleImageLoad(); // Count as loaded to prevent getting stuck
+              return null;
+            }
+
+            return (
+              <Image
+                key={index}
+                src={src}
+                alt={`preload-${index}`}
+                width={1}
+                height={1}
+                onLoad={handleImageLoad}
+                onError={() => handleImageError(src)}
+                priority={index < 5} // Prioritize first few images
+              />
+            );
+          })}
       </div>
 
       {/* Render children only after loading is complete */}

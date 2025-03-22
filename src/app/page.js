@@ -157,6 +157,7 @@ export default function MemoryGame() {
   };
 
   // Check if selected buckets match
+
   const checkForMatch = (selected) => {
     if (selected[0].color === selected[1].color) {
       // Match found
@@ -166,10 +167,13 @@ export default function MemoryGame() {
           : b
       );
       setBuckets(updatedBuckets);
-      setMatchedPairs(matchedPairs + 1);
 
-      // Check if level is complete
-      if (matchedPairs + 1 === buckets.length / 2) {
+      // Calculate new matchedPairs count
+      const newMatchedPairs = matchedPairs + 1;
+      setMatchedPairs(newMatchedPairs);
+
+      // Check if level is complete using the newly calculated value
+      if (newMatchedPairs === buckets.length / 2) {
         if (level === 3) {
           // Game won
           setTimeout(() => {
@@ -206,7 +210,6 @@ export default function MemoryGame() {
     // Clear selected buckets
     setSelectedBuckets([]);
   };
-
   // Show rules popup
   const showRulesPopup = () => {
     setShowRules(true);

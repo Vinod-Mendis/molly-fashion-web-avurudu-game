@@ -47,45 +47,47 @@ const colorNames = [
 ];
 
 // Get all the game images directly - do NOT use .src property
+// In your utils/image-paths.js file
 export const getAllGameImages = () => {
   return [
     // UI images
-    title.src,
-    logo.src,
-    sun.src,
-    rope.src,
-    mandala.src,
-    mandala_b.src,
-    title_2.src,
-    mandala_rules.src,
-    kokis.src,
+    title,
+    logo,
+    sun,
+    rope,
+    mandala,
+    mandala_b,
+    title_2,
+    mandala_rules,
+    kokis,
 
     // Pot state images
-    pot_ideal.src,
-    pot_broken.src,
-    pot_broken_fluid.src,
+    pot_ideal,
+    pot_broken,
+    pot_broken_fluid,
 
     // Color-specific pot images
-    pot_fluid_red.src,
-    pot_fluid_blue.src,
-    pot_fluid_green.src,
-    pot_fluid_yellow.src,
-    pot_fluid_purple.src,
-    pot_fluid_pink.src,
-    pot_fluid_orange.src,
-    pot_fluid_teal.src,
+    pot_fluid_red,
+    pot_fluid_blue,
+    pot_fluid_green,
+    pot_fluid_yellow,
+    pot_fluid_purple,
+    pot_fluid_pink,
+    pot_fluid_orange,
+    pot_fluid_teal,
 
     // Fluid animation images
-    fluid_red.src,
-    fluid_blue.src,
-    fluid_green.src,
-    fluid_yellow.src,
-    fluid_purple.src,
-    fluid_pink.src,
-    fluid_orange.src,
-    fluid_teal.src,
+    fluid_red,
+    fluid_blue,
+    fluid_green,
+    fluid_yellow,
+    fluid_purple,
+    fluid_pink,
+    fluid_orange,
+    fluid_teal,
   ];
 };
+
 
 export {
   title,
