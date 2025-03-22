@@ -5,15 +5,19 @@
 import { useState, useEffect, useRef } from "react";
 import Bucket from "../components/Bucket";
 import Image from "next/image";
-import title from "../../public/images/title.png";
-import logo from "../../public/images/molly logo.png";
-import sun from "../../public/images/sun.png";
-import rope from "../../public/images/rope.png";
-import mandala from "../../public/images/mandala.png";
-import mandala_b from "../../public/images/mandala-b.png";
-import title_2 from "../../public/images/title-2.png";
-import mandala_rules from "../../public/images/mandala-rules.png";
-import kokis from "../../public/images/kokis.png";
+import ImagePreloader from "../components/ImagePreloader";
+import {
+  getAllGameImages,
+  title,
+  logo,
+  sun,
+  rope,
+  mandala,
+  mandala_b,
+  title_2,
+  mandala_rules,
+  kokis,
+} from "../utils/image-paths";
 
 // Game configuration constant
 const INITIAL_CHANCES = 5;
@@ -24,14 +28,25 @@ export default function MemoryGame() {
   const [buckets, setBuckets] = useState([]);
   const [selectedBuckets, setSelectedBuckets] = useState([]);
   const [matchedPairs, setMatchedPairs] = useState(0);
-  const [gameStatus, setGameStatus] = useState("preview"); // preview, rules, playing, won, lost
+  const [gameStatus, setGameStatus] = useState("loading"); // loading, preview, rules, playing, won, lost
   const [isChecking, setIsChecking] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // All game images to preload
+  const gameImages = getAllGameImages();
+
+  // Handle when image preloading is complete
+  const handleImagesLoaded = () => {
+    setImagesLoaded(true);
+    setGameStatus("preview");
+    initializePreview();
+  };
 
   // Colors for the buckets
   const colors = [
@@ -99,11 +114,6 @@ export default function MemoryGame() {
     setSelectedBuckets([]);
     setMatchedPairs(0);
   };
-
-  // Initialize the game preview
-  useEffect(() => {
-    initializePreview();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize the game level
   useEffect(() => {
@@ -276,235 +286,222 @@ export default function MemoryGame() {
     }
   };
 
-  // playAudio();
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen overflow-hidden">
-
-      <div className="w-full flex flex-col items-center">
-        {/* Clouds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
-        <div id="clouds">
-          <div className="cloud x1"></div>
-          <div className="cloud x2"></div>
-          <div className="cloud x3"></div>
-          <div className="cloud x4"></div>
-          <div className="cloud x5"></div>
-          <div className="cloud x6"></div>
-          <div className="cloud x7"></div>
-        </div>
-        {/* Clouds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
-        {/* birds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/}
-        <div className="overflow-hidden absolute inset-0">
-          <div className="bird-container bird-container-one">
-            <div className="bird bird-one"></div>
+    <ImagePreloader images={gameImages} onLoadingComplete={handleImagesLoaded}>
+      <div className="flex flex-col items-center justify-center min-h-screen overflow-hidden">
+        <div className="w-full flex flex-col items-center">
+          {/* Clouds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
+          <div id="clouds">
+            <div className="cloud x1"></div>
+            <div className="cloud x2"></div>
+            <div className="cloud x3"></div>
+            <div className="cloud x4"></div>
+            <div className="cloud x5"></div>
+            <div className="cloud x6"></div>
+            <div className="cloud x7"></div>
           </div>
-          <div className="bird-container bird-container-two">
-            <div className="bird bird-two"></div>
-          </div>
-          <div className="bird-container bird-container-three">
-            <div className="bird bird-three"></div>
-          </div>
-          <div className="bird-container bird-container-four">
-            <div className="bird bird-four"></div>
-          </div>
-        </div>
-        {/* birds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/}
-        <Image
-          src={mandala || "/placeholder.svg"}
-          width={200}
-          height={200}
-          alt="mandala"
-          className="absolute bottom-0 right-0 z-10 opacity-20"
-        />
-        <Image
-          src={mandala || "/placeholder.svg"}
-          width={200}
-          height={200}
-          alt="mandala"
-          className="absolute bottom-0 left-0 z-10 opacity-20 rotate-90"
-        />
-        <Image
-          src={mandala_b || "/placeholder.svg"}
-          width={400}
-          height={400}
-          alt="mandala-b"
-          className="absolute bottom-0 z-10 opacity-5"
-        />
-
-        <Image
-          src={rope || "/placeholder.svg"}
-          width={"auto"}
-          height={"auto"}
-          alt="rope"
-          className="absolute top-85 z-10"
-        />
-
-        <div className="bg-gradient-to-b from-[#2A5286] to-[#2A5286/0] w-full flex justify-center items-center absolute top-0 py-10">
-          {gameStatus !== "playing" && (
-            <>
-              <div className="bg-white py-6 px-10 rounded-b-2xl absolute top-0 sm:left-20 z-10">
-                <Image
-                  src={logo || "/placeholder.svg"}
-                  width={200}
-                  height={200}
-                  alt="logo"
-                  className=""
-                />
-              </div>
-              <Image
-                src={sun || "/placeholder.svg"}
-                width={100}
-                height={100}
-                alt="sun"
-                className="absolute top-0 right-0 z-10 sm:w-[280px]"
-              />
-              <Image
-                src={title || "/placeholder.svg"}
-                width={560}
-                height={560}
-                alt="title"
-                // className="absolute top-14"
-              />
-            </>
-          )}
-        </div>
-
-        {gameStatus === "preview" && (
-          <div className="relative w-full h-screen flex justify-center items-center">
-            <div className="grid grid-cols-2 sm:flex gap-14 opacity-80 absolute top-85 z-10">
-              {buckets.map((bucket) => (
-                <Bucket key={bucket.id} bucket={bucket} onClick={() => {}} />
-              ))}
+          {/* Clouds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
+          {/* birds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/}
+          <div className="overflow-hidden absolute inset-0">
+            <div className="bird-container bird-container-one">
+              <div className="bird bird-one"></div>
             </div>
-
-            <div className="absolute z-10 bottom-20 w-full flex items-center justify-center">
-              <button
-                onClick={() => {
-                  showRulesPopup();
-                  playAudio();
-                }}
-                className="px-8 py-4 bg-[#B39B00] border-2 border-white shadow-2xl shadow-black/70 cursor-pointer text-white rounded-lg hover:bg-[#816F00] transition-colors text-xl font-bold">
-                Play
-              </button>
+            <div className="bird-container bird-container-two">
+              <div className="bird bird-two"></div>
+            </div>
+            <div className="bird-container bird-container-three">
+              <div className="bird bird-three"></div>
+            </div>
+            <div className="bird-container bird-container-four">
+              <div className="bird bird-four"></div>
             </div>
           </div>
-        )}
+          {/* birds >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/}
+          <Image
+            src={mandala || "/placeholder.svg"}
+            width={200}
+            height={200}
+            alt="mandala"
+            className="absolute bottom-0 right-0 z-10 opacity-20"
+          />
+          <Image
+            src={mandala || "/placeholder.svg"}
+            width={200}
+            height={200}
+            alt="mandala"
+            className="absolute bottom-0 left-0 z-10 opacity-20 rotate-90"
+          />
+          <Image
+            src={mandala_b || "/placeholder.svg"}
+            width={400}
+            height={400}
+            alt="mandala-b"
+            className="absolute bottom-0 z-10 opacity-5"
+          />
 
-        {/* Rules Popup */}
-        {showRules && (
-          <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
-            <div className="relative overflow-hidden bg-white rounded-3xl shadow-2xl max-w-lg w-full text-center flex flex-col gap-5 justify-center items-center">
-              <div className="relative overflow-hidden rounded-3xl py-8 shadow-2xl max-w-lg w-full text-center flex flex-col gap-5 justify-center items-center z-10">
-                <div className="w-full flex justify-center items-center relative z-0 px-8">
-                  {/* Logo Image (Lowest z-index, behind everything) */}
+          <Image
+            src={rope || "/placeholder.svg"}
+            width={"auto"}
+            height={"auto"}
+            alt="rope"
+            className="absolute top-85 z-10"
+          />
+
+          <div className="bg-gradient-to-b from-[#2A5286] to-[#2A5286/0] w-full flex justify-center items-center absolute top-0 py-10">
+            {gameStatus !== "playing" && (
+              <>
+                <div className="bg-white py-6 px-10 rounded-b-2xl absolute top-0 sm:left-20 z-10">
                   <Image
                     src={logo || "/placeholder.svg"}
-                    width={500}
-                    height={500}
+                    width={200}
+                    height={200}
                     alt="logo"
-                    className="absolute opacity-10 -z-10"
-                  />
-                  {/* Title Image (Higher z-index) */}
-                  <Image
-                    src={title_2 || "/placeholder.svg"}
-                    width={300}
-                    height={300}
-                    alt="title-2"
-                    className="relative z-10"
+                    className=""
                   />
                 </div>
+                <Image
+                  src={sun || "/placeholder.svg"}
+                  width={100}
+                  height={100}
+                  alt="sun"
+                  className="absolute top-0 right-0 z-10 sm:w-[280px]"
+                />
+                <Image
+                  src={title || "/placeholder.svg"}
+                  width={560}
+                  height={560}
+                  alt="title"
+                  // className="absolute top-14"
+                />
+              </>
+            )}
+          </div>
 
-                <div className="overflow-hidden bg-gradient-to-r from-[#B39B00] via-[#897700] to-[#B39B00] w-full flex justify-center items-center py-2 relative">
-                  <h2 className="text-xl text-white uppercase font-bold relative z-10">
-                    Rules
-                  </h2>
-                  <Image
-                    src={mandala_rules || "/placeholder.svg"}
-                    width={300}
-                    height={300}
-                    alt="logo"
-                    className="absolute z-0 opacity-30"
-                  />
-                </div>
-
-                <ul className="text-left space-y-2">
-                  <li className="flex items-start">
-                    <span className="mr-2">1.</span>
-                    <span>Click on buckets to find matching color pairs</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mr-2">2.</span>
-                    <span>
-                      You have {INITIAL_CHANCES} lives to complete each level
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mr-2">3.</span>
-                    <span>Complete all 3 levels to win the game</span>
-                  </li>
-                </ul>
-
-                <button
-                  onClick={startGame}
-                  className="px-8 py-2 bg-[#B39B00] border-2 border-white shadow-xl shadow-black/20 cursor-pointer text-white rounded-lg hover:bg-[#816F00] transition-colors text-xl font-bold mt-6">
-                  Start Game
-                </button>
+          {gameStatus === "preview" && (
+            <div className="relative w-full h-screen flex justify-center items-center">
+              <div className="grid grid-cols-2 sm:flex gap-14 opacity-80 absolute top-85 z-10">
+                {buckets.map((bucket) => (
+                  <Bucket key={bucket.id} bucket={bucket} onClick={() => {}} />
+                ))}
               </div>
 
-              <div className="absolute bottom-0 w-full h-44 bg-gradient-to-t from-[#B38C00]/50 to-[#B38C00/0]"></div>
+              <div className="absolute z-10 bottom-20 w-full flex items-center justify-center">
+                <button
+                  onClick={() => {
+                    showRulesPopup();
+                    playAudio();
+                  }}
+                  className="px-8 py-4 bg-[#B39B00] border-2 border-white shadow-2xl shadow-black/70 cursor-pointer text-white rounded-lg hover:bg-[#816F00] transition-colors text-xl font-bold">
+                  Play
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {gameStatus !== "preview" && !showRules && (
-          <div className="bg-yellow-400">
-            <div className="flex items-center justify-center w-full max-w-md mb-6">
-              {gameStatus !== "won" && gameStatus !== "lost" && (
-                <div className="flex flex-col gap-4 items-center absolute top-40">
-                  <div className="text-xl font-semibold mr-2 uppercase text-white">
-                    Level {level}:
-                  </div>
-                  <span
-                    className={`${levelTag.color} text-white px-12 py-2 rounded-full text-xl uppercase font-medium`}>
-                    {levelTag.text}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {gameStatus === "playing" && (
-              <div className="flex flex-col items-center">
-                <div
-                  className={`grid grid-cols-4 sm:flex  gap-10 absolute top-85 z-10`}>
-                  {buckets.map((bucket) => (
-                    <Bucket
-                      key={bucket.id}
-                      bucket={bucket}
-                      onClick={() => handleBucketClick(bucket)}
+          {/* Rest of your component remains the same */}
+          {/* Rules Popup */}
+          {showRules && (
+            <div className="fixed inset-0 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50">
+              <div className="relative overflow-hidden bg-white rounded-3xl shadow-2xl max-w-lg w-full text-center flex flex-col gap-5 justify-center items-center">
+                <div className="relative overflow-hidden rounded-3xl py-8 shadow-2xl max-w-lg w-full text-center flex flex-col gap-5 justify-center items-center z-10">
+                  <div className="w-full flex justify-center items-center relative z-0 px-8">
+                    {/* Logo Image (Lowest z-index, behind everything) */}
+                    <Image
+                      src={logo || "/placeholder.svg"}
+                      width={500}
+                      height={500}
+                      alt="logo"
+                      className="absolute opacity-10 -z-10"
                     />
-                  ))}
+                    {/* Title Image (Higher z-index) */}
+                    <Image
+                      src={title_2 || "/placeholder.svg"}
+                      width={300}
+                      height={300}
+                      alt="title-2"
+                      className="relative z-10"
+                    />
+                  </div>
+
+                  <div className="overflow-hidden bg-gradient-to-r from-[#B39B00] via-[#897700] to-[#B39B00] w-full flex justify-center items-center py-2 relative">
+                    <h2 className="text-xl text-white uppercase font-bold relative z-10">
+                      Rules
+                    </h2>
+                    <Image
+                      src={mandala_rules || "/placeholder.svg"}
+                      width={300}
+                      height={300}
+                      alt="logo"
+                      className="absolute z-0 opacity-30"
+                    />
+                  </div>
+
+                  <ul className="text-left space-y-2">
+                    <li className="flex items-start">
+                      <span className="mr-2">1.</span>
+                      <span>Click on buckets to find matching color pairs</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">2.</span>
+                      <span>
+                        You have {INITIAL_CHANCES} lives to complete each level
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">3.</span>
+                      <span>Complete all 3 levels to win the game</span>
+                    </li>
+                  </ul>
+
+                  <button
+                    onClick={startGame}
+                    className="px-8 py-2 bg-[#B39B00] border-2 border-white shadow-xl shadow-black/20 cursor-pointer text-white rounded-lg hover:bg-[#816F00] transition-colors text-xl font-bold mt-6">
+                    Start Game
+                  </button>
                 </div>
 
-                {/* Lives just under the buckets */}
-                <div className="flex flex-col gap-4 items-center justify-center absolute bottom-0 bg-gradient-to-t from-green-800/65 w-full h-56">
-                  <div className="text-xl font-semibold uppercase">Lives:</div>
-                  <div className="flex gap-4">
-                    {Array.from({ length: chances }).map((_, i) => (
-                      <div key={i}>
-                        <Image
-                          src={kokis}
-                          width={50}
-                          height={50}
-                          alt="mandala"
-                          className=""
-                        />
-                      </div>
+                <div className="absolute bottom-0 w-full h-44 bg-gradient-to-t from-[#B38C00]/50 to-[#B38C00/0]"></div>
+              </div>
+            </div>
+          )}
+
+          {gameStatus !== "preview" && !showRules && (
+            <div className="bg-yellow-400">
+              <div className="flex items-center justify-center w-full max-w-md mb-6">
+                {gameStatus !== "won" && gameStatus !== "lost" && (
+                  <div className="flex flex-col gap-4 items-center absolute top-40">
+                    <div className="text-xl font-semibold mr-2 uppercase text-white">
+                      Level {level}:
+                    </div>
+                    <span
+                      className={`${levelTag.color} text-white px-12 py-2 rounded-full text-xl uppercase font-medium`}>
+                      {levelTag.text}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {gameStatus === "playing" && (
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`grid grid-cols-4 sm:flex  gap-10 absolute top-85 z-10`}>
+                    {buckets.map((bucket) => (
+                      <Bucket
+                        key={bucket.id}
+                        bucket={bucket}
+                        onClick={() => handleBucketClick(bucket)}
+                      />
                     ))}
-                    {Array.from({ length: INITIAL_CHANCES - chances }).map(
-                      (_, i) => (
-                        <div
-                          key={i + chances}
-                          className="text-gray-300 opacity-30">
+                  </div>
+
+                  {/* Lives just under the buckets */}
+                  <div className="flex flex-col gap-4 items-center justify-center absolute bottom-0 bg-gradient-to-t from-green-800/65 w-full h-56">
+                    <div className="text-xl font-semibold uppercase">
+                      Lives:
+                    </div>
+                    <div className="flex gap-4">
+                      {Array.from({ length: chances }).map((_, i) => (
+                        <div key={i}>
                           <Image
                             src={kokis}
                             width={50}
@@ -513,71 +510,86 @@ export default function MemoryGame() {
                             className=""
                           />
                         </div>
-                      )
-                    )}
+                      ))}
+                      {Array.from({ length: INITIAL_CHANCES - chances }).map(
+                        (_, i) => (
+                          <div
+                            key={i + chances}
+                            className="text-gray-300 opacity-30">
+                            <Image
+                              src={kokis}
+                              width={50}
+                              height={50}
+                              alt="mandala"
+                              className=""
+                            />
+                          </div>
+                        )
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {gameStatus === "won" && (
-              <div className="flex items-center justify-center bg-black/50 w-full h-screen absolute inset-0 z-10">
-                <div className="py-10 w-fit text-center bg-white rounded-2xl shadow-2xl relative overflow-hidden">
-                  <div className="w-full bg-gradient-to-t from-[#B39B00]/40 absolute h-20 bottom-0 left-0" />
-                  <div className="overflow-hidden bg-gradient-to-r from-[#B39B00] via-[#897700] to-[#B39B00] w-full flex justify-center items-center py-2 relative">
-                    <h2 className="text-xl text-white uppercase font-bold relative z-10">
-                      Congratulations!
-                    </h2>
-                    <Image
-                      src={mandala_rules || "/placeholder.svg"}
-                      width={300}
-                      height={300}
-                      alt="logo"
-                      className="absolute z-0 opacity-30"
-                    />
-                  </div>
-                  <p className="mb-4 text-xl px-10 mt-5">
-                    You&apos;ve completed all levels!
-                  </p>
-                  {/* <button
+              {gameStatus === "won" && (
+                <div className="flex items-center justify-center bg-black/50 w-full h-screen absolute inset-0 z-10">
+                  <div className="py-10 w-fit text-center bg-white rounded-2xl shadow-2xl relative overflow-hidden">
+                    <div className="w-full bg-gradient-to-t from-[#B39B00]/40 absolute h-20 bottom-0 left-0" />
+                    <div className="overflow-hidden bg-gradient-to-r from-[#B39B00] via-[#897700] to-[#B39B00] w-full flex justify-center items-center py-2 relative">
+                      <h2 className="text-xl text-white uppercase font-bold relative z-10">
+                        Congratulations!
+                      </h2>
+                      <Image
+                        src={mandala_rules || "/placeholder.svg"}
+                        width={300}
+                        height={300}
+                        alt="logo"
+                        className="absolute z-0 opacity-30"
+                      />
+                    </div>
+                    <p className="mb-4 text-xl px-10 mt-5">
+                      You&apos;ve completed all levels!
+                    </p>
+                    {/* <button
                 onClick={resetGame}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
                 Try Again
               </button> */}
-                </div>
-              </div>
-            )}
-
-            {gameStatus === "lost" && (
-              <div className="flex items-center justify-center bg-black/50 w-full h-screen absolute inset-0 z-10">
-                <div className="py-10 w-fit text-center bg-white rounded-2xl shadow-2xl relative overflow-hidden">
-                  <div className="w-full bg-gradient-to-t from-[#B39B00]/40 absolute h-20 bottom-0 left-0" />
-                  <div className="overflow-hidden bg-gradient-to-r from-[#B39B00] via-[#897700] to-[#B39B00] w-full flex justify-center items-center py-2 relative">
-                    <h2 className="text-xl text-white uppercase font-bold relative z-10">
-                      GAME OVER
-                    </h2>
-                    <Image
-                      src={mandala_rules || "/placeholder.svg"}
-                      width={300}
-                      height={300}
-                      alt="logo"
-                      className="absolute z-0 opacity-30"
-                    />
                   </div>
-                  <p className="mb-4 text-xl px-10 mt-5">
-                    You&apos;ve run out of chances.
-                  </p>
-                  {/* <button
+                </div>
+              )}
+
+              {gameStatus === "lost" && (
+                <div className="flex items-center justify-center bg-black/50 w-full h-screen absolute inset-0 z-10">
+                  <div className="py-10 w-fit text-center bg-white rounded-2xl shadow-2xl relative overflow-hidden">
+                    <div className="w-full bg-gradient-to-t from-[#B39B00]/40 absolute h-20 bottom-0 left-0" />
+                    <div className="overflow-hidden bg-gradient-to-r from-[#B39B00] via-[#897700] to-[#B39B00] w-full flex justify-center items-center py-2 relative">
+                      <h2 className="text-xl text-white uppercase font-bold relative z-10">
+                        GAME OVER
+                      </h2>
+                      <Image
+                        src={mandala_rules || "/placeholder.svg"}
+                        width={300}
+                        height={300}
+                        alt="logo"
+                        className="absolute z-0 opacity-30"
+                      />
+                    </div>
+                    <p className="mb-4 text-xl px-10 mt-5">
+                      You&apos;ve run out of chances.
+                    </p>
+                    {/* <button
                   onClick={resetGame}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
                   Try Again
                 </button> */}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ImagePreloader>
   );
 }
